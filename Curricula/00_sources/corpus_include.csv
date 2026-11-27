@@ -1,0 +1,84 @@
+rel_path,title,bibkey,include,reason,exists_in_a,exists_in_b
+GI/Bildungsstandards-SekII.json,"Bildungsstandards Informatik für die Sekundarstufe II (GI, 2016)",Roehner2016,True,included,True,True
+GI/Bildungsstandards-SekI_2025.json,"Bildungsstandards Informatik für die Sekundarstufe I (GI, 2025)",GI2019,True,included,True,True
+GI/EmpfehlungenLK.json,"Informatikkompetenzen für alle Lehrkräfte (GI, 2023)",GI2023,True,included: GI recommendation 'Informatikkompetenzen fuer alle Lehrkraefte' (2023),True,True
+KMK/202312-Empfehlunegn-Ak_lebi-final.json,"Informatikkompetenzen für alle Lehrkräfte (GI, 2023)",GI2023,False,"duplicate of GI/EmpfehlungenLK (GI recommendation 'Informatikkompetenzen fuer alle Lehrkraefte' 2023, misfiled under KMK)",False,True
+KMK/epa_informatik.json,"Einheitliche Prüfungsanforderungen Informatik (KMK, 1989 i.d.F. 2004)",KMK2004,True,included,False,True
+Lehrpläne/Baden-Württemberg/Gemeinsamer Bildungsplan SEK 1/SEK1(Aufbaukurs).json,Gemeinsamer Bildungsplan Sek. I 2016: Aufbaukurs Informatik,MinisteriumKultus2018b,True,included,True,True
+Lehrpläne/Baden-Württemberg/Gemeinsamer Bildungsplan SEK 1/SEK1(IMP).json,"Gemeinsamer Bildungsplan Sek. I 2016: Informatik, Mathematik, Physik (IMP), Profilfach an der Gemeinschaftsschule",MinisteriumKultus2018a,True,included,True,True
+Lehrpläne/Baden-Württemberg/Gemeinsamer Bildungsplan SEK 1/SEK1(Wahlfach).json,"Gemeinsamer Bildungsplan Sek. I 2016: Wahlfach Informatik an Haupt-, Werkreal- und Realschule",MinisteriumKultus2018,False,"other school type (Haupt-, Werkreal- and Realschule)",True,True
+Lehrpläne/Baden-Württemberg/Gemeinschaftsschulen/SEK2(IMP).json,Bildungsplan der Oberstufe an Gemeinschaftsschulen 2016: IMP Profilfach,MinisteriumKultus2018c,True,included,True,True
+Lehrpläne/Baden-Württemberg/Gymnasien/SEK2(Aufbaukurs).json,Bildungsplan des Gymnasiums 2016: Aufbaukurs Informatik,MinisteriumKultus2017,True,included,True,True
+Lehrpläne/Baden-Württemberg/Gymnasien/SEK2(IMP).json,Bildungsplan des Gymnasiums 2016: IMP Profilfach,MinisteriumKultus2018d,True,included,True,True
+Lehrpläne/Baden-Württemberg/Gymnasien/SEK2(Schulversuch).json,"Bildungsplan Gymnasium 2016, Schulversuchsfassung: Informatik (Stand 2020)",MinisteriumKultus2020,True,included,True,True
+Lehrpläne/Baden-Württemberg/Gymnasien/SEK2(Wahlfach-Schulversuch).json,"Bildungsplan Gymnasium 2016, Schulversuchsfassung: Informatik – Wahlfach in der Oberstufe (Stand 2020)",MinisteriumKultus2020a,True,included,True,True
+Lehrpläne/Bayern/Berufsoberschule.json,Fachlehrplan Berufsoberschule: Informatik 12,ISB2024f,False,vocational track (Berufsoberschule),True,True
+Lehrpläne/Bayern/Fachoberschule.json,Fachlehrplan Fachoberschule: Informatik 12,ISB2024e,False,vocational track (Fachoberschule),True,True
+Lehrpläne/Bayern/Gymnasium.json,Fachlehrpläne Gymnasium: Informatik (LehrplanPLUS),ISB2024,True,included,True,True
+Lehrpläne/Bayern/Mittelschule - Informatik und digitales Gestalten.json,Fachlehrplan Mittelschule: Informatik und digitales Gestalten 7–10,ISB2024b,False,other school type (Mittelschule),True,True
+Lehrpläne/Bayern/Mittelschule - Informatik.json,Fachlehrplan Mittelschule: Informatik,ISB2024a,False,other school type (Mittelschule),True,True
+Lehrpläne/Bayern/Realschule - Informationstechnologie.json,Fachlehrplan Realschule: Informationstechnologie,ISB2024c,False,other school type (Realschule),True,True
+Lehrpläne/Bayern/Wirtschaftsschule - Informationsverarbeitung.json,Fachlehrplan Wirtschaftsschule: Informationsverarbeitung,ISB2024d,False,other school type (Wirtschaftsschule),True,False
+Lehrpläne/Berlin&Brandenburg/Teil_C_Informatik_2015_11_10_WEB.json,"Rahmenlehrplan 1–10, Teil C Informatik, Wahlpflichtfach Jahrgangsstufen 7–10 (Berlin/Brandenburg, 2015)",SenatsverwaltungBildung2015,True,"included (joint curriculum of Berlin and Brandenburg, Sek. I)",True,True
+Lehrpläne/Berlin&Brandenburg/rahmenlehrplan-informatik-go-teil-c.json,"Rahmenlehrplan für die gymnasiale Oberstufe, Teil C Informatik (Berlin)",SenatsverwaltungBildung2022,True,"included (Berlin, gymnasiale Oberstufe)",True,False
+Lehrpläne/Berlin&Brandenburg/sek1_itg_informatik.json,"Rahmenlehrplan Sek. I, ITG/Informatik Wahlpflichtfach (2006)",SenatsverwaltungBildung2006,False,"older version (ITG/Informatik 2006, replaced by Teil C 2015)",True,True
+Lehrpläne/Bremen/Bremen_SekI_Entwurf.json,"Entwurf Bildungsplan Informatik Sekundarstufe I (Arbeitsfassung, 2025)",Schule2025,True,included,True,True
+Lehrpläne/Bremen/inf_gyq_2009.json,"Bildungsplan Informatik für die Gymnasiale Oberstufe, Qualifikationsphase (2009)",DSBW2009,True,included,True,True
+Lehrpläne/Hamburg/informatik-gym-seki-data.json,Bildungsplan Gymnasium Sek. I: Informatik Wahlpflichtfach,FHH2011,True,included,True,True
+Lehrpläne/Hamburg/informatik-gyo-2022-data.json,Bildungsplan Studienstufe: Informatik (2022),FHH2022,True,included,True,True
+Lehrpläne/Hamburg/informatik-sts-data.json,Bildungsplan Stadtteilschule Jahrgangsstufen 7–11: Informatik Wahlpflichtfach,FHH2014,True,included,True,True
+Lehrpläne/Hessen/Gym8.json,"Lehrplan Informatik, Gymnasiale Oberstufe (G8, 2010)",HessischesKultusministerium2010,False,"older version (Lehrplan 2010, replaced by Kerncurriculum gymnasiale Oberstufe)",True,True
+Lehrpläne/Hessen/Gym9.json,"Lehrplan Informatik, Jahrgangsstufe 11 bis 13 (G9, 2010)",HessischesKultusministerium2008,False,"older version (Lehrplan 2010, replaced by Kerncurriculum gymnasiale Oberstufe)",True,True
+Lehrpläne/Hessen/HS-kch_informatik.json,"Kerncurriculum Informatik für den Wahlunterricht Sek. I, gymnasialer Bildungsgang (2021)",HessischesKultusministerium2021,True,included,True,True
+Lehrpläne/Hessen/InfVer_Technik.json,"Lehrplan Höhere Berufsfachschule, Informationsverarbeitung (Technik)",HessischesKultusministerium2006,False,vocational track (Höhere Berufsfachschule),True,True
+Lehrpläne/Hessen/InfVer_Wirtschaft.json,"Lehrplan Höhere Berufsfachschule, Informationsverarbeitung (Wirtschaft)",HessischesKultusministerium2006a,False,vocational track (Höhere Berufsfachschule),True,True
+Lehrpläne/Mecklenburg-Vorpommern/RP_INFO_MR_5-10.json,"Rahmenplan Sek. I Regionale Schule, Gesamtschule: Informatik und Medienbildung",MBWK2019b,True,included,True,True
+Lehrpläne/Mecklenburg-Vorpommern/RP_INFO_SEK2.json,Rahmenplan Qualifikationsphase der gymnasialen Oberstufe: Informatik,MBWK2019a,True,included,True,True
+Lehrpläne/Mecklenburg-Vorpommern/Rahmenplan+Informatik+und+Medienbildung+für+das+Gymnasium+Klasse+5+bis+10.json,Rahmenplan Gymnasium Klasse 5–10: Informatik und Medienbildung (Anhörungsfassung),MBWK2019c,True,included,True,True
+Lehrpläne/Niedersachsen/INF_Ergaenzende-Hinweise_GO_2018.json,"Ergänzende Hinweise zum Kerncurriculum Informatik, gymnasiale Oberstufe (2018)",NKM2018,False,older version (replaced by GO_2021),True,True
+Lehrpläne/Niedersachsen/INF_Ergaenzende-Hinweise_GO_2021.json,"Ergänzende Hinweise zum Kerncurriculum Informatik, gymnasiale Oberstufe (2021)",NKM2021,True,included,True,True
+Lehrpläne/Niedersachsen/epa_informatik.json,"Einheitliche Prüfungsanforderungen Informatik (KMK, 1989 i.d.F. 2004)",KMK2004,False,duplicate of KMK/epa_informatik,False,True
+Lehrpläne/Niedersachsen/inf_go_kc_druck_2017.json,"Kerncurriculum Informatik, gymnasiale Oberstufe (Gymnasium, Gesamtschule, Kolleg) (2017)",Beckmann2017,True,included,True,True
+Lehrpläne/Niedersachsen/kc_informatik_sek_i-2.json,"Kerncurriculum Informatik für die Schulformen des Sekundarbereichs I, Schuljahrgänge 5–10",Borstelmann2014,True,included,True,True
+Lehrpläne/Nordrhein-Westfalen/KLP_GOSt_Informatik.json,Kernlehrplan Sek. II Gymnasium/Gesamtschule: Informatik,NRW2014,True,included,True,True
+Lehrpläne/Nordrhein-Westfalen/KLP_WbK_IF.json,Kernlehrplan Abendgymnasium und Kolleg: Informatik,NRW2015,False,second-chance education (Abendgymnasium/Kolleg),True,True
+Lehrpläne/Nordrhein-Westfalen/si_kl5u6_if_klp_2021_07_01.json,"Kernlehrplan Sek. I, Klasse 5 und 6: Informatik (2021)",NRW562021,True,included,True,True
+Lehrpläne/Nordrhein-Westfalen/si_kl5u6_if_silp_2022_07_26.json,"Beispiel für einen schulinternen Lehrplan Sek. I, Klasse 5 und 6: Informatik (2022)",QUALiS2022,True,included,False,True
+Lehrpläne/Rheinland-Pfalz/Informatik_LP_SekI.json,"Lehrplan Informatik, Wahlfach und Wahlpflichtfach an Gymnasien und Integrierten Gesamtschulen (Sek. I)",RLPSekI,True,included,True,True
+Lehrpläne/Rheinland-Pfalz/Informatik_LP_SekII.json,"Lehrplan Informatik, Grund- und Leistungsfach der gymnasialen Oberstufe",RLPSekII,True,included,True,True
+Lehrpläne/Saarland/BINF_SP-MINF_EP_2019.json,"Lehrplan Berufliche Informatik, Medizininformatik, Einführungsphase (2019)",Saarland2019a,False,vocational track (berufsbezogene Fachrichtung),True,True
+Lehrpläne/Saarland/BINF_SP-MINF_HP_GK_2019.json,"Lehrplan Berufliche Informatik, Medizininformatik, Hauptphase (2019)",Saarland2019b,False,vocational track (berufsbezogene Fachrichtung),True,True
+Lehrpläne/Saarland/BINF_SP-TINF_EP_2019.json,"Lehrplan Berufliche Informatik, Technische Informatik, Einführungsphase (2019)",Saarland2019c,False,vocational track (berufsbezogene Fachrichtung),True,True
+Lehrpläne/Saarland/BINF_SP-TINF_HP_GK_2019.json,"Lehrplan Berufliche Informatik, Technische Informatik, Hauptphase (2019)",Saarland2019d,False,vocational track (berufsbezogene Fachrichtung),True,True
+Lehrpläne/Saarland/BINF_SP-WINF_EP_2019.json,"Lehrplan Berufliche Informatik, Wirtschaftsinformatik, Einführungsphase (2019)",Saarland2019e,False,vocational track (berufsbezogene Fachrichtung),True,True
+Lehrpläne/Saarland/BINF_SP-WINF_HP_GK_2019.json,"Lehrplan Berufliche Informatik, Wirtschaftsinformatik, Hauptphase (2019)",Saarland2019f,False,vocational track (berufsbezogene Fachrichtung),True,True
+Lehrpläne/Saarland/Bioinformatik_HP_GK_2019.json,"Lehrplan Bioinformatik, berufsbezogene Fachrichtung Technik, Hauptphase (2019)",Saarland2019g,False,"vocational track (gymnasiale Oberstufe, berufsbezogene Fachrichtung Technik)",True,True
+Lehrpläne/Saarland/INEinfphFeb2006.json,"Lehrplan Informatik für die Einführungsphase der gymnasialen Oberstufe (G8, 2006)",Saarland2006,True,included,True,False
+Lehrpläne/Saarland/Informatiksysteme_EPundHP_LK_2019.json,"Lehrplan Informatiksysteme, berufsbezogene Fachrichtung Technik (2019)",Saarland2019h,False,"vocational track (gymnasiale Oberstufe, berufsbezogene Fachrichtung Technik)",True,True
+Lehrpläne/Saarland/LP_In_HP_LK_2019.json,"Lehrplan Informatik, gymnasiale Oberstufe, Leistungskurs Hauptphase (Erprobungsphase, 2019)",Saarland2019,True,included,True,True
+Lehrpläne/Saarland/LP_Info_gems_gym_7_2023.json,"Lehrplan Informatik Gemeinschaftsschule, Klassenstufe 7 (2023)",Saarland2023b,True,included,True,True
+Lehrpläne/Saarland/fak_inhalte_lp_inf_gy_sek1_2021.json,Umgang mit dem Lehrplan im Kontext der Pandemie: Informatik Gymnasium Sek. I (2021),Saarland2021,False,not a curriculum (pandemic guidance),True,True
+Lehrpläne/Sachsen-Anhalt/FLP_FGym_Informatik_LT.json,Fachlehrplan Fachgymnasium Informatik (2017),LSA2017,False,vocational track (Fachgymnasium),True,True
+Lehrpläne/Sachsen-Anhalt/FLP_Informatik_Gym_01082022_swd.json,Fachlehrplan Gymnasium Informatik (2022),Burgemeister2022,True,included,True,True
+Lehrpläne/Sachsen-Anhalt/Hinweise_SKS_Informatik_Technik_010824.json,"Orientierende Hinweise Fächerverbund Informatik und Technik, Sekundarschule 5/6 (2024)",LSA2024,False,other school type (Sekundarschule),True,True
+Lehrpläne/Sachsen-Anhalt/lp_sks_tech_01_08_2019.json,Fachlehrplan Sekundarschule Technik (2019),LSA2019,False,"other school type (Sekundarschule), subject Technik",True,True
+Lehrpläne/Sachsen/FS Fachrichtung Informatik 2021.json,"Lehrplan Fachschule, Fachrichtung Informatik (2021)",SMK2021,False,vocational track (Fachschule),True,True
+Lehrpläne/Sachsen/lp_gy_informatik_2019.json,Lehrplan Gymnasium Informatik (2019),SMK2019,False,older version (replaced by lp_gy_informatik_2022),True,True
+Lehrpläne/Sachsen/lp_gy_informatik_2022.json,Lehrplan Gymnasium Informatik (2022),LSB2022,True,included,True,True
+Lehrpläne/Sachsen/lp_os_informatik_2019.json,Lehrplan Oberschule Informatik (2019),SMK2019a,False,other school type (Oberschule),True,True
+Lehrpläne/Sachsen/lp_os_informatik_2022.json,Lehrplan Oberschule Informatik (2022),LSB2022a,False,other school type (Oberschule),True,True
+Lehrpläne/Schleswig-Holstein/21-14520 Fachanforderungen Informatik SEK_WEB_PDF UA.json,"Fachanforderungen Informatik, allgemein bildende Schulen, Sek. I und II",MinisteriumBildung2021,True,included,True,True
+Lehrpläne/Schleswig-Holstein/SEK1.json,"Fachanforderungen Informatik, allgemein bildende Schulen, Sek. I und II",MinisteriumBildung2021,False,duplicate (part of the Fachanforderungen document),False,True
+Lehrpläne/Schleswig-Holstein/SEK2.json,"Fachanforderungen Informatik, allgemein bildende Schulen, Sek. I und II",MinisteriumBildung2021,False,duplicate (part of the Fachanforderungen document),False,True
+Lehrpläne/Thüringen/FS_Inf_Syst.json,"Lehrplan Fachschule, Fachrichtung Informatik",Thueringen2010,False,vocational track (Fachschule),True,True
+Lehrpläne/Thüringen/Lehrplan_MBI_Klassenstufen_5-6.json,Lehrplan Klassenstufen 5 und 6: Medienbildung und Informatik,TMBJS2024,True,included,True,True
+Lehrpläne/Thüringen/RS_WPF_Inf7_10_25_07_2013_final.json,"Lehrplan Haupt- und Realschulabschluss, Wahlpflichtfach Informatik (2013)",Thueringen2012a,False,other school type (Haupt-/Realschulabschluss),True,True
+Lehrpläne/Thüringen/TH-RS_WPF_Inf7_10_25_07_2013_final.json,"Lehrplan Haupt- und Realschulabschluss, Wahlpflichtfach Informatik (2013)",Thueringen2012a,False,other school type (Haupt-/Realschulabschluss); duplicate,True,True
+Lehrpläne/Thüringen/bg12_13_Wahlfach_Informatik.json,"Lehrplan berufliches Gymnasium, Wahlfach Informatik, Qualifikationsphase",Thueringen2011,False,vocational track (berufliches Gymnasium),True,True
+Lehrpläne/Thüringen/bgy_lp_if_11.json,"Lehrplan berufliches Gymnasium, Berufliche Informatik, Einführungsphase",TKM2009,False,vocational track (berufliches Gymnasium),True,True
+Lehrpläne/Thüringen/bgy_lp_if_12-13.json,"Lehrplan berufliches Gymnasium, Berufliche Informatik, Qualifikationsphase",TKM2009a,False,vocational track (berufliches Gymnasium),True,True
+Lehrpläne/Thüringen/fs_lp_if_techif.json,"Lehrplan Fachschule, Fachrichtung Informatik, Technische Informatik",TKM2004,False,vocational track (Fachschule),True,False
+Lehrpläne/Thüringen/fs_lp_if_wirtschif.json,"Lehrplan Fachschule, Fachrichtung Informatik, Wirtschaftsinformatik",TKM2004a,False,vocational track (Fachschule),True,False
+Lehrpläne/Hessen/HS-kcgo-in.json,Kerncurriculum gymnasiale Oberstufe Informatik,HessischesKultusministerium,True,added 2026-10-20: Kerncurriculum gymnasiale Oberstufe (current),False,False
+Lehrpläne/Thüringen/TH-Lehrplan_inf_Gym_9_12_26112012.json,Lehrplan für den Erwerb der allgemeinen Hochschulreife: Informatik (2012),Thueringen2012,True,added 2026-10-20: Lehrplan allgemeine Hochschulreife Informatik 2012 (general Gymnasium),False,False
+Lehrpläne/Berlin&Brandenburg/BB-Teil_C_RLP_GOST_2022_Informatik.json,"Rahmenlehrplan für die gymnasiale Oberstufe, Teil C Informatik (Brandenburg, gültig ab 2018, Fassung 2022)",MinisteriumBildung2022,True,"added 2026-10-20: Brandenburg, gymnasiale Oberstufe",False,False

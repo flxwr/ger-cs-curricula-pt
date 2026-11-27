@@ -1,0 +1,32 @@
+# Python deps for the whole project -- the Module/Skripte/ extraction/coding
+# pipeline (01_extraction through 06_aicoding) and the Curricula/Skripte/
+# notebooks. Install into a venv with: pip install -r requirements.txt
+
+# PDF extraction (01_extraction, 02_module_splitting)
+pdfplumber>=0.11.10
+pypdf>=6.16.2
+
+# Text matching / sectionizing (02_module_splitting, 03_keyword_screening)
+regex>=2026.9.3
+
+# Tabular output (03_keyword_screening, 04_coding_sheet, 06_aicoding)
+pandas>=2.2.1
+openpyxl>=3.1  # pandas' .xlsx writer for build_coding_sheet.py
+
+# LLM backends (06_aicoding)
+anthropic>=1.5.0
+openai>=3.14.0
+python-dotenv>=1.2.3
+
+# Curricula/Skripte notebooks (analyse.ipynb, keyword-analysis.ipynb, ...)
+numpy>=1.26.4
+matplotlib>=3.8
+nltk>=3.8
+ipykernel>=6.29.3
+scikit-learn
+
+# Multi-rater reliability (07_irr/krippendorff_analysis.ipynb)
+krippendorff>=0.8.2
+
+# Automatic label-collision avoidance for the university map (08_evaluation)
+textalloc>=1.2.4

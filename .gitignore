@@ -1,0 +1,12 @@
+# Source documents and everything containing their full text
+Curricula/00_sources/pdfs/
+Curricula/01_text_extraction/txt1/
+Curricula/02_keyword_retrieval/keyword_results/*/*_raw.xlsx
+Curricula/03_extraction_table/Extraktionstabelle_Entwurf.xlsx
+Curricula/04_coding_viewer/codings_export.xlsx
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

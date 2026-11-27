@@ -1,0 +1,919 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Curricula – Codier-Viewer</title>
+<style>
+  :root {
+    --bg:#f7f7f5; --panel:#ffffff; --border:#e0ded8; --text:#1f1e1c; --muted:#6b6862;
+    --accent:#a6572e; --accent-bg:#f6e9e0; --yes:#2f7a3d; --no:#9a968d; --unsure:#c9a227;
+    --hl-kw:#fde68a; --hl-bind:#bfdbfe; --hl-attr:#fbcfe8; --hl-ctx:#bbf7d0; --diff:#fee2e2; --warn:#b45309;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1b1a18; --panel:#232220; --border:#3a3833; --text:#ece9e3; --muted:#a39e93;
+      --accent:#e0a37c; --accent-bg:#332a22; --yes:#7fd18f; --no:#6b675e; --unsure:#e3c15a;
+      --hl-kw:#5c4a12; --hl-bind:#1e3a5f; --hl-attr:#5b2140; --hl-ctx:#1f4d2e; --diff:#4a2020; --warn:#f0a35a; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.5 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif; }
+  #app { display:grid; grid-template-columns:400px 1fr; grid-template-rows:auto auto auto 1fr; height:100vh; }
+  header, .coderbar, .filterbar { grid-column:1/-1; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+    padding:7px 14px; border-bottom:1px solid var(--border); }
+  header { background:var(--panel); }
+  header h1 { font-size:15px; margin:0 10px 0 0; font-weight:650; white-space:nowrap; }
+  .coderbar { background:var(--accent-bg); font-size:12.5px; }
+  .filterbar { background:var(--panel); font-size:12.5px; }
+  input[type=search], input[type=text], select, textarea {
+    padding:5px 8px; border:1px solid var(--border); border-radius:6px; background:var(--bg); color:var(--text); font:inherit; font-size:13px; }
+  input[type=search] { flex:1 1 200px; }
+  select { max-width:240px; }
+  button { padding:5px 10px; border:1px solid var(--border); border-radius:6px; background:var(--panel); color:var(--text);
+    font-size:12px; cursor:pointer; }
+  button:hover { border-color:var(--accent); color:var(--accent); }
+  label.chk { font-size:12px; color:var(--muted); display:flex; gap:4px; align-items:center; white-space:nowrap; }
+  .muted { color:var(--muted); }
+  #count, .savestatus { margin-left:auto; color:var(--muted); font-size:12px; white-space:nowrap; display:flex; gap:5px; align-items:center; }
+  .savedot { width:7px; height:7px; border-radius:50%; background:var(--yes); display:inline-block; }
+  .savedot.dirty { background:var(--unsure); }
+  .lbl { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.03em; }
+
+  #list { overflow-y:auto; border-right:1px solid var(--border); background:var(--panel); }
+  .row { padding:8px 14px; border-bottom:1px solid var(--border); cursor:pointer; }
+  .row:hover { background:var(--accent-bg); }
+  .row.active { background:var(--accent-bg); border-left:3px solid var(--accent); padding-left:11px; }
+  .row .t { font-weight:600; font-size:12.5px; display:flex; gap:6px; align-items:center; }
+  .row .s { font-size:11.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .badge { font-size:10px; padding:0 5px; border-radius:4px; border:1px solid var(--border); color:var(--muted); font-weight:400; }
+  .badge.hoch { color:var(--accent); border-color:var(--accent); }
+  .badge.add { color:#2f6fa8; border-color:#2f6fa8; }
+  .badge.multi { color:var(--text); border-color:var(--text); }
+  .badge.warn { color:var(--warn); border-color:var(--warn); }
+  .dot { width:9px; height:9px; border-radius:50%; display:inline-block; flex:none; border:1px solid var(--border); }
+  .dot.ja { background:var(--yes); border-color:var(--yes); }
+  .dot.nein { background:var(--no); border-color:var(--no); }
+  .dot.unklar { background:var(--unsure); border-color:var(--unsure); }
+  .dot.diff { outline:2px solid #d9534f; outline-offset:1px; }
+
+  #detail { overflow-y:auto; padding:18px 28px 80px; }
+  #detail .empty { color:var(--muted); padding:40px; text-align:center; }
+  #detail h2 { margin:0 0 2px; font-size:18px; }
+  .sub { color:var(--muted); font-size:12.5px; margin-bottom:12px; }
+  .sub a { color:var(--accent); text-decoration:none; font-weight:600; }
+  .nav { float:right; display:flex; gap:6px; }
+  .box { background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:14px; }
+  .box h3 { margin:0 0 8px; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); font-weight:600; }
+  .passage { white-space:pre-wrap; font-size:14px; line-height:1.6; }
+  .hints { display:flex; flex-wrap:wrap; gap:6px 14px; font-size:12px; margin-top:8px; color:var(--muted); }
+  .hints b { color:var(--text); font-weight:600; }
+  mark { color:inherit; border-radius:3px; padding:0 1px; }
+  mark.kw { background:var(--hl-kw); } mark.bind { background:var(--hl-bind); }
+  mark.attr { background:var(--hl-attr); } mark.ctx { background:var(--hl-ctx); }
+  .legend { font-size:11px; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; }
+  details summary { cursor:pointer; font-size:12.5px; color:var(--accent); user-select:none; }
+  .pagetext { white-space:pre-wrap; font-size:13px; max-height:420px; overflow-y:auto; margin-top:8px; }
+  .inpage { outline:2px solid var(--accent); border-radius:3px; }
+
+  .form { border:1px solid var(--accent); }
+  .form h3 { color:var(--accent); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px 18px; margin-bottom:12px; }
+  .f label.small, label.small { display:block; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--muted); margin-bottom:4px; }
+  .f input[type=text], .f select, .f textarea { width:100%; }
+  textarea { min-height:60px; resize:vertical; }
+  .btns { display:flex; gap:4px; flex-wrap:wrap; }
+  .opt { padding:4px 10px; border:1px solid var(--border); border-radius:14px; background:var(--bg); font-size:12.5px; cursor:pointer; user-select:none; }
+  .opt.on { background:var(--accent); border-color:var(--accent); color:var(--panel); }
+  .opt.on.ja { background:var(--yes); border-color:var(--yes); }
+  .opt.on.nein { background:var(--no); border-color:var(--no); }
+  .opt.on.unklar { background:var(--unsure); border-color:var(--unsure); color:#1f1e1c; }
+  .codes { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:5px 14px; margin-bottom:12px; }
+  .codes label { font-size:13px; display:flex; gap:6px; align-items:center; cursor:pointer; }
+  .disabled { opacity:.45; pointer-events:none; }
+  .cmp table { border-collapse:collapse; font-size:12.5px; width:100%; }
+  .cmp td, .cmp th { border-bottom:1px solid var(--border); padding:3px 8px; text-align:left; vertical-align:top; }
+  .cmp .diff { background:var(--diff); }
+  .std { font-size:9.5px; text-transform:none; letter-spacing:0; padding:0 5px; border-radius:8px; background:var(--hl-ctx); color:var(--text); margin-left:4px; }
+  .std.reset { background:var(--bg); border:1px solid var(--border); cursor:pointer; }
+  .std.reset:hover { border-color:var(--accent); color:var(--accent); }
+  .suggest { margin-top:6px; font-size:12px; display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
+  .chip { padding:1px 8px; border-radius:12px; border:1px solid var(--accent); color:var(--accent); cursor:pointer; user-select:none; }
+  .chip:hover { background:var(--accent-bg); }
+  .chip.all { border-style:dashed; }
+  .defaults { border-top:1px dashed var(--border); padding-top:10px; margin:6px 0 12px; }
+  .kbd { font-family:var(--mono); font-size:11px; border:1px solid var(--border); border-radius:4px; padding:0 4px; }
+
+  .tabs { display:flex; gap:4px; flex-wrap:wrap; align-items:flex-end; border-bottom:1px solid var(--border); margin:4px 0 12px; }
+  .tab { padding:5px 12px 4px; border:1px solid var(--border); border-bottom:none; border-radius:8px 8px 0 0; background:var(--bg);
+    font-size:12.5px; cursor:pointer; user-select:none; margin-bottom:-1px; max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .tab.on { background:var(--panel); border-color:var(--accent); color:var(--accent); font-weight:600; }
+  .tab .sum { font-weight:400; color:var(--muted); font-size:11px; margin-left:4px; }
+  .tab.addtab { border-style:dashed; color:var(--muted); }
+  .stmt-actions { display:flex; gap:6px; margin-left:auto; padding-bottom:4px; }
+  .warnbox { border:1px solid var(--warn); color:var(--warn); border-radius:6px; padding:5px 9px; font-size:12px; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>Curricula – Codier-Viewer</h1>
+    <input type="search" id="q" placeholder="Suche in Passagen / Dokumentnamen…">
+    <select id="f-land"><option value="">Alle Länder/Gruppen</option></select>
+    <select id="f-doc"><option value="">Alle Dokumente</option></select>
+    <select id="f-prio"><option value="">Priorität: alle</option><option value="hoch">hoch</option><option value="niedrig">niedrig</option></select>
+    <label class="chk"><input type="checkbox" id="f-corpus" checked> nur Korpus</label>
+    <span id="count"></span>
+  </header>
+  <div class="coderbar">
+    <span>Codierer:in:</span>
+    <input type="text" id="coder-id" placeholder="z. B. FW" style="width:110px">
+    <button id="btn-new">Neue Sitzung</button>
+    <button id="btn-import">Importieren…</button>
+    <button id="btn-export">Exportieren ↓</button>
+    <button id="btn-compare">Vergleichsdatei laden…</button>
+    <input type="file" id="file-import" accept=".json" style="display:none">
+    <input type="file" id="file-compare" accept=".json" style="display:none">
+    <span class="muted" id="file-label">keine Codierung geladen</span>
+    <span class="savestatus"><span class="savedot" id="save-dot"></span><span id="save-text">—</span></span>
+  </div>
+  <div class="filterbar">
+    <span class="lbl">Status:</span>
+    <select id="f-status">
+      <option value="">alle</option>
+      <option value="uncoded">noch nicht codiert</option>
+      <option value="ja">relevant = ja</option>
+      <option value="nein">relevant = nein</option>
+      <option value="unklar">relevant = unklar</option>
+      <option value="multi">mehrere Aussagen</option>
+      <option value="incomplete">ja, aber Stufe/Niveau/Verbindlichkeit fehlt</option>
+      <option value="unchecked">ja, Zitat nicht geprüft</option>
+      <option value="migrated">migriert – bitte prüfen</option>
+      <option value="diff">Abweichung zur Vergleichsdatei</option>
+    </select>
+    <select id="f-code"><option value="">Code: alle</option></select>
+    <span class="muted" style="font-size:11.5px">Tasten: <span class="kbd">j</span>/<span class="kbd">k</span> weiter/zurück ·
+      <span class="kbd">1</span> ja <span class="kbd">2</span> nein <span class="kbd">3</span> unklar · <span class="kbd">p</span> PDF ·
+      <span class="kbd">a</span> weitere Aussage</span>
+    <span id="progress" class="muted" style="margin-left:auto;font-size:12px"></span>
+  </div>
+  <div id="list"></div>
+  <div id="detail"><div class="empty">Links eine Passage auswählen.</div></div>
+</div>
+
+<script src="viewer_data.js"></script>
+<script>
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => Array.from(el.querySelectorAll(s));
+const PDF_ROOT = "../00_sources/pdfs/";
+const DOCS = CORPUS.documents;
+const SCHEMA = "curricula-coding-v2";
+
+// ---------------------------------------------------------------------------
+// Codebook (keep in sync with README.md and the 'Anleitung' sheet)
+// Unit of coding: the STATEMENT. A passage (retrieval window) can contain several
+// statements; split whenever level, course type, level of demand or bindingness differ.
+// ---------------------------------------------------------------------------
+const CODES = [
+  ["blockbasiert", "blockbasiert"],
+  ["visuell", "visuell / grafisch"],
+  ["textbasiert", "textbasiert"],
+  ["geeignet", "geeignet / didaktisch reduziert"],
+  ["einfach", "einfach"],
+  ["altersangemessen", "altersangemessen"],
+  ["aktuell", "aktuell / modern"],
+  ["mittel_zum_zweck", "Mittel zum Zweck (keine Produktschulung)"],
+  ["inhalt_proxy", "Inhalt als Proxy (OOP / Paradigma)"],
+  ["open_source", "freie / Open-Source-Software"],
+  ["progression", "Übergang / Progression"],
+  ["werkzeug", "konkretes Werkzeug genannt"],
+];
+const SHORT = { blockbasiert: "block", visuell: "vis", textbasiert: "text", geeignet: "geeign", einfach: "einf",
+  altersangemessen: "alter", aktuell: "aktuell", mittel_zum_zweck: "Mittel", inhalt_proxy: "Inhalt", open_source: "OSS",
+  progression: "Übergang", werkzeug: "Wz" };
+const RELEVANT = ["ja", "nein", "unklar"];
+const LEVELS = ["Sek I", "Sek II", "Sek I+II", "unklar"];
+const COURSES = ["regulär", "Wahlpflicht/Wahlfach", "Leistungskurs", "alle", "unklar"];
+const NIVEAUS = ["grundlegend", "erhöht", "nicht differenziert"];
+const BINDING = ["verbindlich", "Empfehlung", "Beispiel", "nicht spezifiziert"];
+const QUOTE_CHECK = ["", "ja", "korrigiert", "nein"];
+const DOC_STATUS = ["", "gültig", "Entwurf/Anhörung", "veraltet/ersetzt", "unklar"];
+const AUTOSAVE_MS = 2 * 60 * 1000;
+// statement fields a document can supply as defaults
+const DEFAULTABLE = ["level", "grades", "course", "niveau", "binding", "marker"];
+// fields that define a statement for splitting / comparison
+const SIGNATURE_FIELDS = ["level", "course", "niveau", "binding"];
+
+// tool names suggested from the passage text (canonical name, pattern)
+const TOOL_PATTERNS = [
+  ["Scratch", /\bScratch\b/i], ["Snap!", /\bSnap!/i], ["Blockly", /\bBlockly\b/i], ["mBlock", /\bmBlock\b/i],
+  ["Open Roberta", /\bOpen\s*Roberta\b/i], ["NEPO", /\bNEPO\b/], ["MakeCode", /\bMakeCode\b/i], ["App Inventor", /\bApp\s*Inventor\b/i],
+  ["Python", /\bPython\b/i], ["JavaScript", /\bJava\s*-?Script\b/i], ["Java", /\bJava\b(?!\s*-?Script)/i],
+  ["C#", /\bC\s?#/], ["C++", /\bC\+\+/], ["Delphi", /\bDelphi\b/i], ["Pascal", /\bPascal\b/i], ["Haskell", /\bHaskell\b/i],
+  ["Prolog", /\bProlog\b/i], ["PHP", /\bPHP\b/], ["Lisp", /\bLisp\b/i], ["Scheme", /\bScheme\b/i], ["Visual Basic", /\bVisual\s*Basic\b/i],
+  ["Robot Karol", /\bRobot\s*Karol\b/i], ["Kara", /\bKara\b/i], ["Logo", /\bLogo\b(?!s)/], ["Hamster", /\bHamster\b/i],
+  ["Greenfoot", /\bGreenfoot\b/i], ["BlueJ", /\bBlueJ\b/i], ["EOS", /\bEOS\b/], ["Thonny", /\bThonny\b/i], ["Jupyter", /\bJupyter\b/i],
+  ["Arduino", /\bArduino\b/i], ["Calliope", /\bCalliope\b/i], ["micro:bit", /\bmicro\s*[:\-]?\s*bit\b/i],
+  ["Raspberry Pi", /\bRaspberry\s*Pi\b/i], ["LEGO Mindstorms", /\bLego\s*Mindstorms\b/i], ["LEGO Spike", /\bLego\s*Spike\b/i],
+  ["LEGO WeDo", /\bLego\s*WeDo\b/i], ["Ozobot", /\bOzobot\b/i], ["Excel", /\bExcel\b/],
+];
+function suggestTools(text) { return TOOL_PATTERNS.filter(([, re]) => re.test(text || "")).map(([n]) => n); }
+function toolList(s) { return (s || "").split(/[;,]/).map(x => x.trim()).filter(Boolean); }
+
+// highlighting (reading aid only)
+const HL = [
+  ["kw", /Programmier[\wäöüß]*|Entwicklungsumgebung\w*|S[kc]riptsprache\w*|block-?\s?(?:basiert|orientiert)\w*|text-?\s?basiert\w*|textuell\w*|visuell\w*|grafisch\w*|graphisch\w*|\b(?:Scratch|Snap!|Blockly|mBlock|Open\s*Roberta|NEPO|Python|Java\s*-?Script|Java|Delphi|Pascal|Prolog|PHP|Lisp|Scheme|Haskell|C\+\+|C#|Visual\s*Basic|Kara|Robot\s*Karol|Logo|Greenfoot|BlueJ|EOS|Thonny|Jupyter|Calliope|Arduino|micro:bit|Raspberry\s*Pi|Lego\s*\w*)\b/i],
+  ["bind", /verbindlich\w*|verpflichtend\w*|\bmüssen\b|\bmuss\b|\bist zu\b|\bsind zu\b|empfohlen|empfiehlt|\bsollte\w*|bietet sich an|bieten sich an|z\.\s?B\.|beispielsweise|exemplarisch|\bkann\b|\bkönnen\b/i],
+  ["attr", /geeignet\w*|angemessen\w*|didaktisch\w*|\beinfach\w*|alters(?:gerecht|angemessen)\w*|schülergerecht\w*|\baktuell\w*|\bmodern\w*|Produktschulung|Selbstzweck|Open[\s-]?Source|freie\w* Software|Syntaxfehler\w*|zunächst|anschließend|später|Übergang\w*/i],
+  ["ctx", /(?:Klassen?(?:stufen?)?|Jahrgangsstufen?|Jahrgänge?|Jg\.)\s*\d{1,2}(?:\s*[-–\/]\s*\d{1,2})?|Sekundarstufe\s+(?:I{1,2}|1|2)\b|Einführungsphase|Qualifikationsphase|Kursstufe|Wahlpflicht\w*|Wahlfach\w*|Leistungskurs\w*|Grundkurs\w*|erhöhte\w*\s+(?:Anforderungs)?[Nn]iveau\w*|grundlegende\w*\s+(?:Anforderungs)?[Nn]iveau\w*|\beA\b|\bgA\b/i],
+];
+const HL_RE = new RegExp(HL.map(([, re]) => "(" + re.source + ")").join("|"), "gi");
+
+// ---------------------------------------------------------------------------
+// Data model
+//   data.passages[id]  = { relevant, note, statements: [stmt, ...], updated_at, _doc, _page, _text_start }
+//   stmt               = { codes{}, tools, level, grades, course, niveau, binding, marker, reason,
+//                          quote, quote_checked, own{field: bool}, _migrated? }
+//   data.documents[k]  = { status, scope, read_fully, note, defaults{field: value} }
+//   data.added[id]     = { doc, page, text }   (passages the keyword search missed)
+// Statement values for DEFAULTABLE fields follow the document default unless own[f] is true.
+// ---------------------------------------------------------------------------
+let coder = "";
+let data = emptyData();
+let fileLabel = "";
+let unsaved = false;
+let compare = null;      // loaded comparison file (read-only)
+let filtered = [];
+let activeId = null;
+let activeStmt = 0;
+let keepVisibleDoc = null;   // document just excluded: stays in the list until another document is opened
+
+function emptyData() { return { passages: {}, documents: {}, added: {} }; }
+function emptyStatement() {
+  return { codes: Object.fromEntries(CODES.map(([k]) => [k, false])), tools: "",
+    level: "", grades: "", course: "", niveau: "", binding: "", marker: "", reason: "", quote: "", quote_checked: "",
+    own: Object.fromEntries(DEFAULTABLE.map(f => [f, false])) };
+}
+function emptyRecord() { return { relevant: "", note: "", statements: [], updated_at: null }; }
+function emptyDocRecord() {
+  return { status: "", scope: "", read_fully: "", note: "", in_corpus: "", corpus_reason: "",
+    defaults: Object.fromEntries(DEFAULTABLE.map(f => [f, ""])), updated_at: null };
+}
+// Corpus membership: the coder's decision in the viewer (in_corpus "ja"/"nein") overrides
+// 00_sources/corpus_include.csv; "" follows the CSV. Documents missing from the CSV count as included.
+function csvInCorpus(key) { return (DOCS[key] || {}).in_corpus !== false; }
+function inCorpus(key) {
+  const dr = data.documents[key];
+  if (dr && dr.in_corpus === "ja") return true;
+  if (dr && dr.in_corpus === "nein") return false;
+  return csvInCorpus(key);
+}
+
+// v1 record (one coding per passage) -> v2 (statements). Idempotent.
+const V1_FIELDS = ["codes", "tools", "level", "grades", "course", "binding", "marker", "reason", "quote", "quote_checked", "own"];
+function migrateRecord(r) {
+  if (!r.statements) {
+    const hasContent = V1_FIELDS.some(f => f === "codes" ? Object.values(r.codes || {}).some(Boolean) : (f !== "own" && r[f]));
+    const s = emptyStatement();
+    for (const f of V1_FIELDS) if (r[f] !== undefined) s[f] = f === "codes" ? { ...s.codes, ...r[f] } : r[f];
+    if (!r.own) s.own = Object.fromEntries(DEFAULTABLE.map(f => [f, !!s[f]]));
+    if (s.course === "erhöhtes Niveau/LK") {
+      s.course = "Leistungskurs"; s.niveau = "erhöht"; s.own.course = true; s.own.niveau = true;
+      s._migrated = "Kursart „erhöhtes Niveau/LK“ wurde zu Kursart „Leistungskurs“ + Niveau „erhöht“ – bitte prüfen";
+    }
+    r.statements = (hasContent || r.relevant === "ja") ? [s] : [];
+    for (const f of V1_FIELDS) delete r[f];
+  }
+  for (const s of r.statements) normalizeStatement(s);
+  if (r.note === undefined) r.note = "";
+  return r;
+}
+function normalizeStatement(s) {
+  s.codes = s.codes || {};
+  for (const [k] of CODES) if (!(k in s.codes)) s.codes[k] = false;
+  s.own = s.own || {};
+  for (const f of DEFAULTABLE) { if (!(f in s.own)) s.own[f] = !!s[f]; if (s[f] === undefined) s[f] = ""; }
+  for (const f of ["tools", "reason", "quote", "quote_checked"]) if (s[f] === undefined) s[f] = "";
+  return s;
+}
+function normalizeData(d) {
+  const out = { passages: d.passages || {}, documents: d.documents || {}, added: d.added || {} };
+  for (const r of Object.values(out.passages)) migrateRecord(r);
+  return out;
+}
+
+function rec(id) {
+  if (!data.passages[id]) data.passages[id] = emptyRecord();
+  return migrateRecord(data.passages[id]);
+}
+function stmts(id) {   // statements of a passage, ensuring at least one when relevant = ja
+  const r = rec(id);
+  if (r.relevant === "ja" && r.statements.length === 0) r.statements.push(emptyStatement());
+  return r.statements;
+}
+function docRec(key) {
+  if (!data.documents[key]) data.documents[key] = emptyDocRecord();
+  const d = data.documents[key];
+  if (d.in_corpus === undefined) d.in_corpus = "";
+  if (d.corpus_reason === undefined) d.corpus_reason = "";
+  if (!d.defaults) d.defaults = {};
+  for (const f of DEFAULTABLE) if (!(f in d.defaults)) d.defaults[f] = "";
+  return d;
+}
+
+function applyDefaults(r, dr) {
+  if (!r || r.relevant !== "ja" || !dr) return false;
+  let changed = false;
+  for (const s of r.statements) for (const f of DEFAULTABLE) {
+    if (s.own[f]) continue;
+    const v = dr.defaults[f] || "";
+    if (s[f] !== v) { s[f] = v; changed = true; }
+  }
+  return changed;
+}
+function applyDefaultsToDoc(docKey) {
+  const dr = docRec(docKey);
+  for (const [id, r] of Object.entries(data.passages)) {
+    const p = passageById(id);
+    if (!p || p.doc !== docKey) continue;
+    migrateRecord(r);
+    if (applyDefaults(r, dr)) r.updated_at = new Date().toISOString();
+  }
+}
+function inherited(s, dr, f) { return !s.own[f] && !!dr.defaults[f]; }
+function storageKey(id) { return "curricula_coding::" + id; }
+
+function allPassages() {
+  const added = Object.entries(data.added).map(([id, a]) => ({
+    id, doc: a.doc, page: a.page, priority: "ergänzt", keywords: [], text: a.text || "",
+    hint_binding: "", hint_attributes: "", context_cues: "", added: true }));
+  return CORPUS.passages.concat(added);
+}
+let PASSAGES = allPassages();
+let PASSAGE_INDEX = new Map(PASSAGES.map(p => [p.id, p]));
+function rebuildPassages() { PASSAGES = allPassages(); PASSAGE_INDEX = new Map(PASSAGES.map(p => [p.id, p])); }
+function passageById(id) { return PASSAGE_INDEX.get(id); }
+
+// ---------------------------------------------------------------------------
+// Persistence (autosave per coder in localStorage; export/import JSON)
+// ---------------------------------------------------------------------------
+function loadSession(id) {
+  coder = id;
+  try { localStorage.setItem("curricula_last_coder", id); } catch (e) {}
+  let saved = null;
+  try { saved = JSON.parse(localStorage.getItem(storageKey(id)) || "null"); } catch (e) {}
+  data = saved && saved.passages ? normalizeData(saved) : emptyData();
+  fileLabel = saved ? (saved.file_label || id + " (autosave)") : "";
+  unsaved = false;
+  rebuildPassages();
+  refreshAll();
+}
+function persist() {
+  if (!coder) return;
+  const payload = { coder, schema: SCHEMA, file_label: fileLabel, saved_at: new Date().toISOString(), ...data };
+  try { localStorage.setItem(storageKey(coder), JSON.stringify(payload)); unsaved = false; updateSave(true); }
+  catch (e) { $("#save-text").textContent = "Autosave fehlgeschlagen – bitte exportieren"; }
+}
+let saveTimer = null;
+function markDirty() { unsaved = true; updateSave(); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 1200); }
+function updateSave(justSaved) {
+  const dot = $("#save-dot"), t = $("#save-text");
+  $("#coder-id").value = coder;
+  $("#file-label").textContent = fileLabel || "keine Codierung geladen";
+  if (!coder) { dot.className = "savedot"; t.textContent = "Kürzel eingeben, um zu starten"; return; }
+  if (unsaved) { dot.className = "savedot dirty"; t.textContent = "ungespeicherte Änderungen…"; }
+  else { dot.className = "savedot"; t.textContent = justSaved ? "im Browser gespeichert (gerade eben)" : "im Browser gespeichert"; }
+}
+function exportData() {
+  if (!coder) { alert("Bitte zuerst ein Kürzel eingeben."); return; }
+  // snapshot doc/page/text start so the file stays readable without the corpus
+  for (const [id, r] of Object.entries(data.passages)) {
+    const p = passageById(id);
+    if (p) { r._doc = p.doc; r._page = p.page; r._text_start = (p.text || "").slice(0, 120); }
+  }
+  const payload = { coder, exported_at: new Date().toISOString(), schema: SCHEMA, ...data };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(blob), download: `coding_${coder}.json` });
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  fileLabel = `coding_${coder}.json (exportiert)`;
+  persist();
+}
+function readJson(file, cb) {
+  const fr = new FileReader();
+  fr.onload = () => { let d; try { d = JSON.parse(fr.result); } catch (e) { alert("Keine gültige JSON-Datei."); return; } cb(d); };
+  fr.readAsText(file);
+}
+function importData(file) {
+  readJson(file, d => {
+    if (!d.passages) { alert("Diese Datei enthält kein Feld \"passages\" – kein Export dieses Viewers."); return; }
+    if (unsaved && !confirm("Ungespeicherte Änderungen verwerfen und Datei laden?")) return;
+    data = normalizeData(d);
+    if (d.coder) coder = d.coder;
+    fileLabel = file.name + " (importiert)";
+    rebuildPassages();
+    persist(); refreshAll();
+  });
+}
+function loadCompare(file) {
+  readJson(file, d => {
+    if (!d.passages) { alert("Keine Codierungsdatei dieses Viewers."); return; }
+    compare = { coder: d.coder || file.name, ...normalizeData(JSON.parse(JSON.stringify(d))) };
+    $("#btn-compare").textContent = "Vergleich: " + compare.coder + " ✕";
+    refreshAll();
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Statement summaries & comparison
+// ---------------------------------------------------------------------------
+function codeSet(s) { return CODES.filter(([k]) => s.codes[k]).map(([k]) => k); }
+function signature(s) {
+  return codeSet(s).filter(k => k !== "werkzeug").join("+") + " | " + SIGNATURE_FIELDS.map(f => s[f] || "–").join(" / ");
+}
+function stmtSummary(s) {
+  const c = codeSet(s).map(k => SHORT[k]).join(", ");
+  const ctx = [s.level, s.niveau && s.niveau !== "nicht differenziert" ? s.niveau : "", s.binding].filter(Boolean).join(" · ");
+  return [c, ctx].filter(Boolean).join(" — ") || "leer";
+}
+function relOf(src, id) { const r = src.passages[id]; return (r && r.relevant) || ""; }
+function stmtsOf(src, id) { const r = src.passages[id]; return r && r.relevant === "ja" ? (r.statements || []) : []; }
+function differs(id) {
+  if (!compare) return false;
+  if (relOf(data, id) !== relOf(compare, id)) return true;
+  if (relOf(data, id) !== "ja") return false;
+  const a = stmtsOf(data, id).map(signature).sort(), b = stmtsOf(compare, id).map(signature).sort();
+  return a.length !== b.length || a.some((x, i) => x !== b[i]);
+}
+
+// ---------------------------------------------------------------------------
+// Filters & list
+// ---------------------------------------------------------------------------
+function isCoded(id) { const r = data.passages[id]; return !!(r && r.relevant); }
+function uniq(arr) { return [...new Set(arr.filter(Boolean))].sort((a, b) => a.localeCompare(b, "de")); }
+function docLabel(key) { const d = DOCS[key]; return d ? `${d.Land} · ${d.Dokument}` : key; }
+
+function populateFilters() {
+  uniq(Object.values(DOCS).map(d => d.Land)).forEach(l => $("#f-land").add(new Option(l, l)));
+  CODES.forEach(([k, l]) => $("#f-code").add(new Option("Code: " + l, k)));
+  refreshDocOptions();
+}
+function refreshDocOptions() {
+  const land = $("#f-land").value, sel = $("#f-doc"), prev = sel.value;
+  sel.innerHTML = ""; sel.add(new Option("Alle Dokumente", ""));
+  Object.values(DOCS).filter(d => !land || d.Land === land)
+    .sort((a, b) => docLabel(a.key).localeCompare(docLabel(b.key), "de"))
+    .forEach(d => sel.add(new Option(`${inCorpus(d.key) ? "" : "✕ "}${d.Dokument} (${d.n_passages})`, d.key)));
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+function applyFilters() {
+  const q = $("#q").value.trim().toLowerCase(), land = $("#f-land").value, doc = $("#f-doc").value;
+  const prio = $("#f-prio").value, corpus = $("#f-corpus").checked, status = $("#f-status").value, code = $("#f-code").value;
+  filtered = PASSAGES.filter(p => {
+    const d = DOCS[p.doc] || {};
+    if (land && d.Land !== land) return false;
+    if (doc && p.doc !== doc) return false;
+    if (prio && p.priority !== prio && !p.added) return false;
+    if (corpus && !inCorpus(p.doc) && p.doc !== keepVisibleDoc) return false;
+    const r = data.passages[p.id], ss = stmtsOf(data, p.id), yes = r && r.relevant === "ja";
+    if (status === "uncoded" && isCoded(p.id)) return false;
+    if (["ja", "nein", "unklar"].includes(status) && (!r || r.relevant !== status)) return false;
+    if (status === "multi" && !(yes && ss.length > 1)) return false;
+    if (status === "incomplete" && !(yes && ss.some(s => !s.level || !s.binding || !s.niveau))) return false;
+    if (status === "unchecked" && !(yes && ss.some(s => !["ja", "korrigiert"].includes(s.quote_checked)))) return false;
+    if (status === "migrated" && !(ss.some(s => s._migrated))) return false;
+    if (status === "diff" && !differs(p.id)) return false;
+    if (code && !(yes && ss.some(s => s.codes[code]))) return false;
+    if (q) {
+      const own = r ? (r.note + " " + ss.map(s => s.quote + " " + s.tools).join(" ")) : "";
+      if (!(p.text + " " + p.doc + " " + own).toLowerCase().includes(q)) return false;
+    }
+    return true;
+  });
+  renderList();
+}
+
+function rowHtml(p) {
+  const r = data.passages[p.id], d = DOCS[p.doc] || {}, ss = stmtsOf(data, p.id);
+  const dot = `<span class="dot ${r && r.relevant ? r.relevant : ""}${differs(p.id) ? " diff" : ""}"></span>`;
+  const badge = p.added ? `<span class="badge add">ergänzt</span>` : `<span class="badge ${p.priority}">${p.priority}</span>`;
+  const multi = ss.length > 1 ? `<span class="badge multi" title="${ss.length} Aussagen">×${ss.length}</span>` : "";
+  const warn = ss.some(s => s._migrated) ? `<span class="badge warn" title="migriert – bitte prüfen">prüfen</span>` : "";
+  return `<div class="t">${dot}<span>${esc(d.Land || "?")} · S. ${p.page}</span>${badge}${multi}${warn}</div>
+    <div class="s">${esc(d.Dokument || p.doc)}${p.keywords.length ? " · " + esc(p.keywords.join(", ")) : ""}</div>`;
+}
+function renderList() {
+  const list = $("#list"); list.innerHTML = "";
+  const frag = document.createDocumentFragment();
+  for (const p of filtered) {
+    const row = document.createElement("div");
+    row.className = "row" + (p.id === activeId ? " active" : "");
+    row.dataset.id = p.id;
+    row.innerHTML = rowHtml(p);
+    row.addEventListener("click", () => select(p.id));
+    frag.appendChild(row);
+  }
+  list.appendChild(frag);
+  $("#count").textContent = `${filtered.length} / ${PASSAGES.length} Passagen`;
+  updateProgress();
+}
+function updateRow(id) {
+  const row = $(`.row[data-id="${CSS.escape(id)}"]`), p = passageById(id);
+  if (row && p) row.innerHTML = rowHtml(p);
+}
+function updateProgress() {
+  const inView = filtered.filter(p => isCoded(p.id)).length;
+  const nStmt = filtered.reduce((n, p) => n + stmtsOf(data, p.id).length, 0);
+  $("#progress").textContent = `codiert in Auswahl: ${inView} / ${filtered.length} Passagen · ${nStmt} Aussagen`;
+}
+function refreshAll() { updateSave(); applyFilters(); if (activeId && passageById(activeId)) select(activeId, true); }
+
+// ---------------------------------------------------------------------------
+// Detail view
+// ---------------------------------------------------------------------------
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function highlight(text) {
+  let out = "", last = 0;
+  for (const m of text.matchAll(HL_RE)) {
+    const gi = m.slice(1).findIndex(g => g !== undefined);
+    out += esc(text.slice(last, m.index)) + `<mark class="${HL[gi][0]}">${esc(m[0])}</mark>`;
+    last = m.index + m[0].length;
+  }
+  return out + esc(text.slice(last));
+}
+function pdfHref(p) {
+  const d = DOCS[p.doc];
+  if (!d || !d.pdf) return null;
+  return PDF_ROOT + d.pdf.split("/").map(encodeURIComponent).join("/") + "#page=" + p.page;
+}
+function optButtons(name, options, value, extraCls = false) {
+  return `<div class="btns" data-field="${name}">` + options.map(o =>
+    `<span class="opt ${extraCls ? o : ""}${value === o ? " on" : ""}" data-value="${esc(o)}">${esc(o)}</span>`).join("") + `</div>`;
+}
+function selectBox(attr, name, options, value) {
+  return `<select ${attr}="${name}">` + options.map(o => `<option value="${esc(o)}"${o === value ? " selected" : ""}>${o ? esc(o) : "—"}</option>`).join("") + `</select>`;
+}
+
+function select(id, keepScroll) {
+  if (id !== activeId) activeStmt = 0;
+  activeId = id;
+  const p = passageById(id); if (!p) return;
+  if (keepVisibleDoc && p.doc !== keepVisibleDoc) {   // left the just-excluded document: drop it from the list
+    keepVisibleDoc = null;
+    applyFilters();
+    const row = $(`.row[data-id="${CSS.escape(id)}"]`); if (row) row.scrollIntoView({ block: "nearest" });
+  }
+  $$(".row").forEach(r => r.classList.toggle("active", r.dataset.id === id));
+  const d = DOCS[p.doc] || {}, r = rec(id), dr = docRec(p.doc), href = pdfHref(p);
+  const ss = stmts(id);
+  if (applyDefaults(r, dr)) { r.updated_at = new Date().toISOString(); if (coder) markDirty(); }
+  if (activeStmt >= ss.length) activeStmt = Math.max(0, ss.length - 1);
+  const pageText = (d.pages || {})[String(p.page)] || "";
+  const idx = pageText && p.text ? pageText.indexOf(p.text) : -1;
+  const pageHtml = idx >= 0
+    ? highlight(pageText.slice(0, idx)) + `<span class="inpage">${highlight(p.text)}</span>` + highlight(pageText.slice(idx + p.text.length))
+    : highlight(pageText);
+  const scroll = $("#detail").scrollTop;
+  const pos = filtered.findIndex(x => x.id === id);
+
+  $("#detail").innerHTML = `
+    <div class="nav"><button id="prev">← zurück</button><button id="next">weiter →</button></div>
+    <h2>${esc(d.Land || "")} – ${esc(d.Dokument || p.doc)}</h2>
+    <div class="sub">${esc(d["Schulform/Ordner"] || "")} · PDF-Seite ${p.page} von ${d.n_pages || "?"}
+      ${href ? ` · <a href="${href}" target="_blank" rel="noopener" id="pdf-link">PDF auf S. ${p.page} öffnen ↗</a>` : " · <i>kein PDF gefunden</i>"}
+      · ${pos >= 0 ? pos + 1 : "–"} / ${filtered.length} in Auswahl · <span class="muted">${esc(p.id)}</span></div>
+
+    <div class="box">
+      <h3>Passage (Textextrakt – gegen PDF prüfen)</h3>
+      ${p.added ? `<div class="muted" style="font-size:12.5px">Manuell ergänzte Passage – Wortlaut unten im Feld „Zitat“ eintragen.</div>`
+                : `<div class="passage">${highlight(p.text)}</div>`}
+      <div class="hints">
+        ${p.keywords.length ? `<span><b>Treffer:</b> ${esc(p.keywords.join(", "))}</span>` : ""}
+        ${p.hint_binding ? `<span><b>Verbindlichkeitssignale:</b> ${esc(p.hint_binding)}</span>` : ""}
+        ${p.hint_attributes ? `<span><b>Attribute:</b> ${esc(p.hint_attributes)}</span>` : ""}
+        ${p.context_cues ? `<span><b>Kontext auf der Seite:</b> ${esc(p.context_cues)}</span>` : ""}
+      </div>
+      <div class="legend"><span><mark class="kw">Werkzeug/Anker</mark></span><span><mark class="bind">Verbindlichkeit</mark></span>
+        <span><mark class="attr">Attribut/Abfolge</mark></span><span><mark class="ctx">Stufe/Kurs/Niveau</mark></span>
+        <span>– nur Lesehilfen, keine Codierung</span></div>
+      ${pageText ? `<details style="margin-top:8px"><summary>Ganze Seite ${p.page} anzeigen (Textextrakt)</summary>
+        <div class="pagetext">${pageHtml}</div></details>` : ""}
+    </div>
+
+    ${renderCompare(id)}
+
+    <div class="box form" id="form">
+      <h3>Codierung${coder ? " – " + esc(coder) : " (oben Kürzel eingeben)"}</h3>
+      <div class="f" style="margin-bottom:12px"><label class="small">Relevant? (enthält die Passage Vorgaben/Empfehlungen/Beispiele zu Programmierwerkzeugen?)</label>
+        ${optButtons("relevant", RELEVANT, r.relevant, true)}</div>
+      ${r.relevant === "ja" ? renderStatements(p, r, dr) : ""}
+      <div class="f"><label class="small">Notiz zur Passage (auch bei nein/unklar)</label><textarea data-pfield="note">${esc(r.note)}</textarea></div>
+    </div>
+
+    <div class="box">
+      <h3>Dokument: ${esc(d.Dokument || p.doc)}</h3>
+      <div class="grid">
+        <div class="f"><label class="small">Im Korpus?</label>
+          <select id="doc-corpus">
+            <option value=""${dr.in_corpus === "" ? " selected" : ""}>wie CSV (${csvInCorpus(p.doc) ? "ja" : "nein"})</option>
+            <option value="ja"${dr.in_corpus === "ja" ? " selected" : ""}>ja – einschließen</option>
+            <option value="nein"${dr.in_corpus === "nein" ? " selected" : ""}>nein – ausschließen</option>
+          </select>
+          ${inCorpus(p.doc) ? "" : `<div style="font-size:12px;color:var(--warn);margin-top:3px">ausgeschlossen – bei „nur Korpus“ nicht in der Liste</div>`}</div>
+        <div class="f"><label class="small">Grund für Ein-/Ausschluss</label><input type="text" data-docfield="corpus_reason" value="${esc(dr.corpus_reason || "")}" placeholder="z. B. veraltet, Duplikat, keine Programmierinhalte"></div>
+        <div class="f"><label class="small">Dokumentstatus</label>${selectBox("data-docfield", "status", DOC_STATUS, dr.status)}</div>
+        <div class="f"><label class="small">Gültig für Stufe/Schulform</label><input type="text" data-docfield="scope" value="${esc(dr.scope)}"></div>
+        <div class="f"><label class="small">Vollständig gelesen? (Recall-Prüfung)</label>${selectBox("data-docfield", "read_fully", ["", "ja", "nein"], dr.read_fully)}</div>
+      </div>
+      <div class="f" style="margin-bottom:10px"><label class="small">Notiz zum Dokument</label><textarea data-docfield="note">${esc(dr.note)}</textarea></div>
+      <div class="defaults" id="doc-defaults">
+        <label class="small">Standardwerte für alle Aussagen dieses Dokuments (gelten, solange eine Aussage keinen eigenen Wert hat)</label>
+        <div class="grid">
+          <div class="f"><label class="small">Stufe</label>${optButtons("level", LEVELS, dr.defaults.level)}</div>
+          <div class="f"><label class="small">Klassen/Phase (wörtlich)</label><input type="text" data-docdefault="grades" value="${esc(dr.defaults.grades)}"></div>
+          <div class="f"><label class="small">Kursart</label>${selectBox("data-docdefault", "course", [""].concat(COURSES), dr.defaults.course)}</div>
+          <div class="f"><label class="small">Anforderungsniveau</label>${optButtons("niveau", NIVEAUS, dr.defaults.niveau)}</div>
+          <div class="f"><label class="small">Verbindlichkeit</label>${optButtons("binding", BINDING, dr.defaults.binding)}</div>
+          <div class="f"><label class="small">Markierung (wörtlich)</label><input type="text" data-docdefault="marker" value="${esc(dr.defaults.marker)}" placeholder="z. B. Abschnitt „Verbindliche Inhalte“"></div>
+        </div>
+      </div>
+      <button id="add-passage" type="button">+ Übersehene Passage in diesem Dokument ergänzen</button>
+      ${p.added ? `<button id="del-passage" type="button" style="margin-left:6px">Diese ergänzte Passage löschen</button>` : ""}
+      <details style="margin-top:10px"><summary>Frühere dokumentweise Codierung (v1, nur zur Orientierung)</summary>
+        <div style="font-size:12.5px;margin-top:6px">${esc(d.manual_coding_v1 || "–")}</div></details>
+    </div>`;
+
+  bindForm(id, p);
+  $("#detail").scrollTop = keepScroll ? scroll : 0;
+  history.replaceState(null, "", "#" + id);
+}
+
+function renderStatements(p, r, dr) {
+  const ss = r.statements, s = ss[activeStmt], k = activeStmt;
+  const badge = f => inherited(s, dr, f)
+    ? ` <span class="std" title="aus dem Dokument-Standard übernommen">Std.</span>`
+    : (s.own[f] && dr.defaults[f]
+        ? ` <span class="std reset" data-reset="${f}" title="eigener Wert – klicken, um den Dokument-Standard (${esc(dr.defaults[f])}) zu übernehmen">↺ Std.</span>` : "");
+  const toolSuggestions = suggestTools((p.text || "") + " " + (s.quote || "")).filter(t => !toolList(s.tools).includes(t));
+  const defaultsSummary = DEFAULTABLE.filter(f => dr.defaults[f]).map(f => esc(dr.defaults[f])).join(" · ");
+  const tabs = ss.map((x, i) => `<span class="tab${i === k ? " on" : ""}" data-stmt="${i}" title="${esc(stmtSummary(x))}">Aussage ${i + 1}<span class="sum">${esc(stmtSummary(x))}</span></span>`).join("");
+  return `
+    <div class="tabs">${tabs}<span class="tab addtab" id="stmt-add" title="weitere Aussage in dieser Passage (Taste a)">+ weitere Aussage</span>
+      <span class="stmt-actions"><button id="stmt-dup" type="button" title="Aussage ${k + 1} kopieren – praktisch beim Aufteilen">Aussage ${k + 1} duplizieren</button>
+      ${ss.length > 1 ? `<button id="stmt-del" type="button">Aussage ${k + 1} löschen</button>` : ""}</span></div>
+    ${ss.length === 1 ? `<div class="muted" style="font-size:12px;margin:-4px 0 10px">Enthält die Passage mehrere Vorgaben mit unterschiedlicher Stufe, Kursart, Niveau oder Verbindlichkeit? Dann je Vorgabe eine Aussage anlegen.</div>` : ""}
+    ${s._migrated ? `<div class="warnbox">${esc(s._migrated)} <button id="stmt-migrated-ok" type="button" style="margin-left:8px">geprüft</button></div>` : ""}
+    <div id="stmt-form">
+      <label class="small">Codes (Mehrfachauswahl)</label>
+      <div class="codes">${CODES.map(([c, l]) => c === "werkzeug"
+        ? `<label title="wird automatisch gesetzt, sobald 'Genannte Werkzeuge' ausgefüllt ist"><input type="checkbox" data-code="${c}"${s.codes[c] ? " checked" : ""} disabled> ${esc(l)} <span class="muted">(auto)</span></label>`
+        : `<label><input type="checkbox" data-code="${c}"${s.codes[c] ? " checked" : ""}> ${esc(l)}</label>`).join("")}</div>
+      <div class="f" style="margin-bottom:12px"><label class="small">Genannte Werkzeuge (setzt „konkretes Werkzeug genannt“ automatisch)</label>
+        <input type="text" data-sfield="tools" value="${esc(s.tools)}" placeholder="z. B. Scratch; Python">
+        <div class="suggest" id="tool-suggest">${toolSuggestions.length
+          ? `<span class="muted">Vorschläge aus der Passage:</span> ` + toolSuggestions.map(t => `<span class="chip" data-tool="${esc(t)}">+ ${esc(t)}</span>`).join("")
+            + (toolSuggestions.length > 1 ? ` <span class="chip all" data-tool="*">alle übernehmen</span>` : "")
+          : `<span class="muted">keine (weiteren) Werkzeugnamen in der Passage erkannt</span>`}</div></div>
+      ${defaultsSummary ? `<div class="muted" style="font-size:12px;margin-bottom:8px">Dokument-Standard: ${defaultsSummary} – unten im Dokument-Kasten änderbar</div>` : ""}
+      <div class="grid">
+        <div class="f"><label class="small">Stufe${badge("level")}</label>${optButtons("level", LEVELS, s.level)}</div>
+        <div class="f"><label class="small">Klassen/Phase (wörtlich)${badge("grades")}</label><input type="text" data-sfield="grades" value="${esc(s.grades)}" placeholder="z. B. Jgst. 7/8; Q1"></div>
+        <div class="f"><label class="small">Kursart${badge("course")}</label>${selectBox("data-sfield", "course", [""].concat(COURSES), s.course)}</div>
+        <div class="f"><label class="small">Anforderungsniveau${badge("niveau")}</label>${optButtons("niveau", NIVEAUS, s.niveau)}</div>
+        <div class="f"><label class="small">Verbindlichkeit (nur aus Markierung im Dokument)${badge("binding")}</label>${optButtons("binding", BINDING, s.binding)}</div>
+        <div class="f"><label class="small">Markierung im Dokument (wörtlich)${badge("marker")}</label><input type="text" data-sfield="marker" value="${esc(s.marker)}" placeholder="z. B. „verbindlich“, Abschnitt „Hinweise“, „z. B.“"></div>
+      </div>
+      <div class="f" style="margin-bottom:12px"><label class="small">Begründung im Dokument (falls vorhanden)</label>
+        <textarea data-sfield="reason" placeholder="z. B. Motivation, Vermeidung von Syntaxfehlern, Altersangemessenheit">${esc(s.reason)}</textarea></div>
+      <div class="f" style="margin-bottom:6px"><label class="small">Zitat dieser Aussage (wörtlich aus dem PDF)</label>
+        <textarea data-sfield="quote" style="min-height:80px">${esc(s.quote)}</textarea></div>
+      <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+        ${p.added ? "" : `<button id="copy-passage" type="button">Passage als Ausgangspunkt übernehmen</button>`}
+        <span class="f" style="display:flex;gap:6px;align-items:center"><label class="small" style="margin:0">Zitat geprüft (PDF)</label>${selectBox("data-sfield", "quote_checked", QUOTE_CHECK, s.quote_checked)}</span>
+      </div>
+    </div>`;
+}
+
+function renderCompare(id) {
+  if (!compare) return "";
+  const ra = relOf(data, id), rb = relOf(compare, id);
+  const sa = stmtsOf(data, id), sb = stmtsOf(compare, id);
+  const sigB = sb.map(signature), sigA = sa.map(signature);
+  const line = (s, otherSigs) => `<div class="${otherSigs.includes(signature(s)) ? "" : "diff"}">${esc(stmtSummary(s))}
+      ${s.course ? `<span class="muted"> · ${esc(s.course)}</span>` : ""}${s.tools ? `<span class="muted"> · ${esc(s.tools)}</span>` : ""}</div>`;
+  return `<div class="box cmp"><h3>Vergleich mit ${esc(compare.coder)}</h3><table>
+    <tr><th></th><th>${esc(coder || "ich")}</th><th>${esc(compare.coder)}</th></tr>
+    <tr><td>Relevant</td><td class="${ra !== rb ? "diff" : ""}">${esc(ra || "—")}</td><td class="${ra !== rb ? "diff" : ""}">${esc(rb || "—")}</td></tr>
+    <tr><td>Anzahl Aussagen</td><td class="${sa.length !== sb.length ? "diff" : ""}">${sa.length}</td><td class="${sa.length !== sb.length ? "diff" : ""}">${sb.length}</td></tr>
+    <tr><td>Aussagen</td><td>${sa.map(s => line(s, sigB)).join("") || "—"}</td><td>${sb.map(s => line(s, sigA)).join("") || "—"}</td></tr>
+    <tr><td>Notiz</td><td>${esc((data.passages[id] || {}).note || "—")}</td><td>${esc((compare.passages[id] || {}).note || "—")}</td></tr>
+  </table><div class="muted" style="font-size:11.5px;margin-top:4px">Rot = Aussage ohne exakte Entsprechung beim Gegenüber (Codes ohne „Werkzeug“ + Stufe/Kursart/Niveau/Verbindlichkeit).</div></div>`;
+}
+
+function touch(id) {
+  if (!coder) { alert("Bitte zuerst oben ein Kürzel eingeben – sonst wird nichts gespeichert."); return false; }
+  if (id) data.passages[id].updated_at = new Date().toISOString();
+  markDirty();
+  if (activeId) updateRow(activeId);
+  updateProgress();
+  return true;
+}
+
+function bindForm(id, p) {
+  const form = $("#form"), r = rec(id), dr = docRec(p.doc);
+  const rerender = () => select(id, true);
+
+  // passage level
+  $$('.btns[data-field="relevant"] .opt', form).forEach(o => o.addEventListener("click", () => {
+    r.relevant = r.relevant === o.dataset.value ? "" : o.dataset.value;
+    if (r.relevant === "ja") { stmts(id); applyDefaults(r, dr); }
+    if (touch(id)) rerender();
+  }));
+  const pnote = $('[data-pfield="note"]', form);
+  pnote.addEventListener("input", debounce(() => { r.note = pnote.value; touch(id); }, 300));
+
+  // statement level
+  if (r.relevant === "ja") bindStatement(id, p, r, dr, rerender);
+
+  // document level
+  $$("[data-docfield]").forEach(el => {
+    const ev = el.tagName === "SELECT" ? "change" : "input";
+    el.addEventListener(ev, debounce(() => { dr[el.dataset.docfield] = el.value; dr.updated_at = new Date().toISOString(); touch(null); }, 300));
+  });
+  $("#doc-corpus").addEventListener("change", e => {
+    dr.in_corpus = e.target.value; dr.updated_at = new Date().toISOString();
+    if (!touch(null)) return;
+    // keep the current document in the list until another document is selected,
+    // so excluding it does not make the passage vanish mid-coding
+    keepVisibleDoc = p.doc;
+    refreshDocOptions(); applyFilters(); select(id, true);
+  });
+  const dd = $("#doc-defaults");
+  $$(".btns", dd).forEach(group => {
+    const f = group.dataset.field;
+    $$(".opt", group).forEach(o => o.addEventListener("click", () => {
+      dr.defaults[f] = dr.defaults[f] === o.dataset.value ? "" : o.dataset.value;
+      dr.updated_at = new Date().toISOString();
+      applyDefaultsToDoc(p.doc);
+      if (touch(null)) rerender();
+    }));
+  });
+  $$("[data-docdefault]", dd).forEach(el => el.addEventListener("change", () => {
+    dr.defaults[el.dataset.docdefault] = el.value.trim();
+    dr.updated_at = new Date().toISOString();
+    applyDefaultsToDoc(p.doc);
+    if (touch(null)) rerender();
+  }));
+  $("#add-passage").addEventListener("click", () => addPassage(p.doc, p.page));
+  const del = $("#del-passage"); if (del) del.addEventListener("click", () => deletePassage(id));
+  $("#prev").addEventListener("click", () => step(-1));
+  $("#next").addEventListener("click", () => step(1));
+}
+
+function bindStatement(id, p, r, dr, rerender) {
+  const sf = $("#stmt-form"), ss = r.statements, s = ss[activeStmt];
+  // tabs & statement actions
+  $$(".tab[data-stmt]").forEach(t => t.addEventListener("click", () => { activeStmt = Number(t.dataset.stmt); rerender(); }));
+  $("#stmt-add").addEventListener("click", () => addStatement(id, false));
+  $("#stmt-dup").addEventListener("click", () => addStatement(id, true));
+  const del = $("#stmt-del");
+  if (del) del.addEventListener("click", () => {
+    if (!confirm(`Aussage ${activeStmt + 1} löschen?`)) return;
+    ss.splice(activeStmt, 1); activeStmt = Math.max(0, activeStmt - 1);
+    if (touch(id)) rerender();
+  });
+  const mig = $("#stmt-migrated-ok");
+  if (mig) mig.addEventListener("click", () => { delete s._migrated; if (touch(id)) rerender(); });
+
+  const syncToolCode = () => {
+    s.codes.werkzeug = toolList(s.tools).length > 0;
+    const cb = $('input[data-code="werkzeug"]', sf); if (cb) cb.checked = s.codes.werkzeug;
+  };
+  $$(".btns", sf).forEach(group => {
+    const f = group.dataset.field;
+    $$(".opt", group).forEach(o => o.addEventListener("click", () => {
+      s[f] = s[f] === o.dataset.value ? "" : o.dataset.value;   // click again to clear
+      if (DEFAULTABLE.includes(f)) s.own[f] = true;
+      if (touch(id)) rerender();
+    }));
+  });
+  $$("input[data-code]", sf).forEach(cb => cb.addEventListener("change", () => {
+    s.codes[cb.dataset.code] = cb.checked;
+    if (touch(id)) refreshTabLabel();
+  }));
+  $$("[data-sfield]", sf).forEach(el => {
+    const f = el.dataset.sfield, ev = el.tagName === "SELECT" ? "change" : "input";
+    el.addEventListener(ev, debounce(() => {
+      s[f] = el.value;
+      if (DEFAULTABLE.includes(f)) s.own[f] = true;
+      if (f === "tools") syncToolCode();
+      if (p.added && f === "quote" && activeStmt === 0) data.added[id].text = el.value;
+      touch(id);
+    }, 300));
+    // refresh badges/suggestions once the field is left (re-rendering while typing would steal focus)
+    if (DEFAULTABLE.includes(f) || f === "tools" || f === "course") el.addEventListener("change", () => setTimeout(rerender, 350));
+  });
+  $$("#tool-suggest .chip", sf).forEach(ch => ch.addEventListener("click", () => {
+    const add = ch.dataset.tool === "*" ? suggestTools((p.text || "") + " " + (s.quote || "")) : [ch.dataset.tool];
+    const list = toolList(s.tools);
+    for (const t of add) if (!list.includes(t)) list.push(t);
+    s.tools = list.join("; ");
+    syncToolCode();
+    if (touch(id)) rerender();
+  }));
+  $$(".std.reset", sf).forEach(b => b.addEventListener("click", () => {
+    s.own[b.dataset.reset] = false;
+    applyDefaults(r, dr);
+    if (touch(id)) rerender();
+  }));
+  const copyBtn = $("#copy-passage");
+  if (copyBtn) copyBtn.addEventListener("click", () => {
+    const ta = $('textarea[data-sfield="quote"]');
+    if (ta.value && !confirm("Vorhandenes Zitat überschreiben?")) return;
+    ta.value = p.text; s.quote = p.text; touch(id);
+  });
+  function refreshTabLabel() {
+    const tab = $(`.tab[data-stmt="${activeStmt}"] .sum`); if (tab) tab.textContent = stmtSummary(s);
+  }
+}
+
+function addStatement(id, duplicate) {
+  if (!coder) { alert("Bitte zuerst ein Kürzel eingeben."); return; }
+  const r = rec(id), p = passageById(id), ss = stmts(id);
+  if (r.relevant !== "ja") return;
+  let s;
+  if (duplicate) {
+    s = normalizeStatement(JSON.parse(JSON.stringify(ss[activeStmt])));
+    delete s._migrated;
+  } else {
+    s = emptyStatement();
+  }
+  ss.push(s);
+  applyDefaults(r, docRec(p.doc));
+  activeStmt = ss.length - 1;
+  if (touch(id)) select(id, true);
+}
+function addPassage(doc, page) {
+  if (!coder) { alert("Bitte zuerst ein Kürzel eingeben."); return; }
+  const pg = prompt("PDF-Seite der übersehenen Passage:", page);
+  if (pg === null || !/^\d+$/.test(pg.trim())) return;
+  const id = `M-${coder}-${Date.now().toString(36)}`;
+  data.added[id] = { doc, page: Number(pg), text: "", created_at: new Date().toISOString() };
+  rebuildPassages();
+  const r = rec(id); r.relevant = "ja"; stmts(id);
+  markDirty(); applyFilters(); select(id);
+}
+function deletePassage(id) {
+  if (!confirm("Ergänzte Passage und ihre Codierung löschen?")) return;
+  delete data.added[id]; delete data.passages[id];
+  rebuildPassages(); markDirty(); activeId = null; applyFilters();
+  $("#detail").innerHTML = `<div class="empty">Passage gelöscht.</div>`;
+}
+function step(dir) {
+  const i = filtered.findIndex(p => p.id === activeId);
+  const n = filtered[i + dir] || (i < 0 ? filtered[0] : null);
+  if (n) { select(n.id); const row = $(`.row[data-id="${CSS.escape(n.id)}"]`); if (row) row.scrollIntoView({ block: "nearest" }); }
+}
+function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
+
+// ---------------------------------------------------------------------------
+// wiring
+// ---------------------------------------------------------------------------
+$("#q").addEventListener("input", debounce(applyFilters, 150));
+$("#f-land").addEventListener("change", () => { refreshDocOptions(); applyFilters(); });
+["#f-doc", "#f-prio", "#f-corpus", "#f-status", "#f-code"].forEach(s => $(s).addEventListener("change", applyFilters));
+$("#coder-id").addEventListener("change", () => { const id = $("#coder-id").value.trim(); if (id) loadSession(id); });
+$("#coder-id").addEventListener("keydown", e => { if (e.key === "Enter") e.target.blur(); });
+$("#btn-new").addEventListener("click", () => {
+  const id = $("#coder-id").value.trim(); if (!id) { alert("Bitte zuerst ein Kürzel eingeben."); return; }
+  if (!confirm(`Neue, leere Sitzung für „${id}“ beginnen? Die bisherige Browser-Sicherung dieses Kürzels wird überschrieben.`)) return;
+  coder = id; data = emptyData(); fileLabel = ""; rebuildPassages(); persist(); refreshAll();
+});
+$("#btn-export").addEventListener("click", () => { const id = $("#coder-id").value.trim(); if (id && id !== coder) loadSession(id); exportData(); });
+$("#btn-import").addEventListener("click", () => $("#file-import").click());
+$("#file-import").addEventListener("change", e => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ""; });
+$("#btn-compare").addEventListener("click", () => {
+  if (compare) { compare = null; $("#btn-compare").textContent = "Vergleichsdatei laden…"; refreshAll(); return; }
+  $("#file-compare").click();
+});
+$("#file-compare").addEventListener("change", e => { if (e.target.files[0]) loadCompare(e.target.files[0]); e.target.value = ""; });
+
+document.addEventListener("keydown", e => {
+  if (["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === "j") step(1);
+  else if (e.key === "k") step(-1);
+  else if (e.key === "p") { const a = $("#pdf-link"); if (a) a.click(); }
+  else if (e.key === "a" && activeId) addStatement(activeId, false);
+  else if (["1", "2", "3"].includes(e.key) && activeId) {
+    const opt = $(`.btns[data-field="relevant"] .opt[data-value="${RELEVANT[Number(e.key) - 1]}"]`);
+    if (opt) opt.click();
+  }
+});
+setInterval(() => { if (unsaved) persist(); }, AUTOSAVE_MS);
+window.addEventListener("beforeunload", () => { if (unsaved) persist(); });
+
+populateFilters();
+try { const last = localStorage.getItem("curricula_last_coder"); if (last) loadSession(last); else { updateSave(); applyFilters(); } }
+catch (e) { updateSave(); applyFilters(); }
+if (location.hash.length > 1) { const id = decodeURIComponent(location.hash.slice(1)); if (passageById(id)) select(id); }
+</script>
+</body>
+</html>
